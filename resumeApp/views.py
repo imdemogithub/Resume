@@ -1,6 +1,7 @@
 from django.shortcuts import redirect, render
 from .models import *
 
+# updated file
 default_data = {
     'app_name': 'My Resume'
 }
