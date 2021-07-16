@@ -1,0 +1,369 @@
+{% extends 'base.html' %}
+
+{% block main_content %}
+<style>
+    .scroller {
+        height: 400px;
+        overflow: hidden;
+        overflow-y: auto;
+    }
+    .open_tab.active {
+      color: #000!important;
+      background-color: #ccc!important;
+    }
+</style>
+
+{% block style_block %}
+<style>
+  div[tab-content] {
+    display: none;
+  }
+  .active {
+    display: block !important;
+  }
+</style>
+{% endblock %}
+<!-- Header/Home -->
+<header class="w3-container w3-padding-32 w3-center w3-black" id="home">
+    <h1 class="w3-jumbo"><span class="w3-hide-small">Hello</span> {user_name}.</h1>
+    <p>You can build your resume online.</p>
+    <img src="/w3images/man_smoke.jpg" alt="boy" class="w3-image" width="992" height="1108">
+  </header>
+
+  <!-- About Section -->
+  <div class="w3-content w3-justify w3-text-grey w3-padding-64" id="about">
+    <h2 class="w3-text-light-grey">My Profile</h2>
+    
+    <hr style="width:200px" class="w3-opacity">
+    <div class="w3-bar w3-white">
+        <button class="w3-bar-item w3-button open_tab active" tab-target="personal">Personal</button>
+        <button class="w3-bar-item w3-button open_tab" tab-target="education">Education</button>
+        <button class="w3-bar-item w3-button open_tab" tab-target="language">Languages</button>
+        <button class="w3-bar-item w3-button open_tab" tab-target="skills">Skills</button>
+        <button class="w3-bar-item w3-button open_tab" tab-target="experience">Experience</button>
+        <button class="w3-bar-item w3-button open_tab" tab-target="settings">Account Settings</button>
+      </div>
+      
+      <div tab-content="personal" class="tab-content w3-container">
+        <h2>Personal Info</h2>
+        <form class="w3-row personal_info_form" enctype="multipart/form-data" action="{% url 'update_profile' %}" method="POST">
+          {% csrf_token %}
+          <div class="w3-col m4 w3-padding-large">
+              <img style="width: 150px; border: solid 1px #fff; border-radius: 50%;" src="{{user_data.user.ProfilePic.url}}" />
+              <input type="file" accept=".jpg, .jpeg, .png" name="profile_pic" />
+          </div>
+          <div class="w3-col m4 w3-padding-large">
+              <p><input class="w3-input w3-padding-16" type="text" placeholder="Full Name" value="{{user_data.user.FullName}}" required name="FullName"></p>
+              <p><input class="w3-input w3-padding-16" type="text" placeholder="Job Profile" value="{{user_data.user.JobProfile}}" required name="JobProfile"></p>
+              <p style="width: max-content;">
+                <div class="input-group w3-half">
+                  <input class="w3-radio" id="m" type="radio" value="m" required name="Gender">
+                  <label for="m">Male</label>
+                </div>
+                <div class="input-group w3-half">
+                  <input class="w3-radio" id="f" type="radio" value="f" required name="Gender">
+                  <label for="f">Female</label>
+                </div>
+              </p>
+          </div>
+          <div class="w3-col m4 w3-padding-large">
+            <p><input class="w3-input w3-padding-16" type="text" placeholder="Mobile" value="{{user_data.user.Mobile}}" required name="Mobile"></p>
+              <p>
+                  <textarea class="w3-input w3-padding-16" type="text" placeholder="Address" style="resize: none;" required name="Address" rows="4">{{user_data.user.Address}}</textarea>
+              </p>
+              <button class="w3-button w3-light-grey w3-padding-large" type="submit">
+                  <i class="fa fa-floppy-o"></i> Update
+                </button>
+          </div>
+        </form>
+      </div>
+      
+      <div tab-content="education" class="tab-content w3-row w3-container">
+        
+        <form class="w3-col m6 education_form" action="{% url 'update_education' %}" method="POST">
+          {% csrf_token %}  
+            <h2>Add New Education</h2>
+            <div class="w3-padding-large">
+                <p><input class="w3-input w3-padding-16" type="text" placeholder="Enter board/university name" required name="Board"></p>
+                <p><input class="w3-input w3-padding-16" type="text" placeholder="Enter Standard" required name="Standard"></p>
+                <p class="w3-half w3-padding-small"><input class="w3-input w3-padding-16" type="date" placeholder="Start Date" required name="StartDate"></p>
+                <p class="w3-half w3-padding-small"><input class="w3-input w3-padding-16" type="date" placeholder="End Date" required name="EndDate"></p>
+                <p class="w3-half w3-padding-small">
+                    <input class="w3-check" id="is_continue" type="checkbox" checked="checked" name="IsContinue">
+                    <label for="is_continue">To Present?</label>
+                </p>
+                <p class="w3-half">
+                <button class="w3-halfw3-button w3-light-grey w3-padding-large" type="submit">
+                    <i class="fa fa-plus"></i> Add Education
+                  </button>
+                  </p>
+            </div>
+          </form>
+          <h2>Your Education List</h2>
+          <div class="w3-col m6 w3-padding-small w3-padding-large education_list scroller" style="padding-top: 5px;">
+            {% for edu in user_data.education %}
+            <div class="w3-card-4 w3-padding-small" style="margin-bottom: 4rem">
+            
+              <header class="w3-container w3-light-grey">
+                <h3>{{edu.Board}}</h3>
+              </header>
+            
+              <div class="w3-container">
+                <p>{{edu.Standard}}</p>
+                <hr>
+            
+                <p><i class="fa fa-calendar"></i> {{edu.StartDate}} - {% if edu.IsContinue %} Continue {% else %} {{edu.EndDate}} {% endif %}</p>
+              </div>
+              <a href="{% url 'remove_education' pk=edu.id %}" class="w3-button w3-block w3-green w3-half">+ Edit</a>
+              <a href="{% url 'remove_education' pk=edu.id %}" class="w3-button w3-block w3-red w3-half">+ Remove</a>
+            
+            </div>
+            {% endfor %}
+        </div>
+      </div>
+      
+      <div tab-content="language" class="tab-content w3-container">
+        <form class="w3-col m6 language_form" action="{% url 'update_language' %}" method="POST">
+          {% csrf_token %}
+          <h2>Add Known Languages</h2>
+        <div class="w3-padding-large">
+          <p><input class="w3-input w3-padding-16 lang-name" type="text" placeholder="Enter language" required
+              name="language"></p>
+          <p>
+            <input class="w3-input w3-padding-16 lang-level" type="range" min="25" max="100" step="25" name="level" required>
+            <output class="bubble"></output>
+          </p>
+          
+          <p class="w3-half">
+            <button class="w3-halfw3-button w3-light-grey w3-padding-large" type="submit">
+              <i class="fa fa-plus"></i> Add Language
+            </button>
+          </p>
+        </div>
+      </form>
+      <h2>Add Known Languages</h2>
+        <div class="w3-col m6 w3-padding-small w3-padding-large language_list scroller" style="padding-top: 5px;">
+          {% for lang in user_data.languages %}
+          <div class="w3-card-4 w3-padding-small">
+              <header class="w3-container w3-light-grey">
+                <h3>{{lang.LangName}}</h3>
+              </header>
+              
+              <div class="w3-container w3-padding-16">
+                <div class="w3-light-grey">
+                  <div class="w3-container w3-green w3-center" style="width:{{lang.Level}}%">{{lang.Level}}%</div>
+                </div>
+              </div>
+              <a class="w3-button w3-block w3-red" href="{% url 'remove_language' pk=lang.pk %}">+ Remove</a>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div tab-content="skills" class="tab-content w3-container">
+        <h2>Add Skills</h2>
+        <div class="w3-col m6 w3-padding-large">
+          <p><input class="w3-input w3-padding-16" type="text" placeholder="Enter board/university name" required
+              name="skill"></p>
+          <p><input class="w3-input w3-padding-16" type="range" min="40" max="100" step="10" name="level" required></p>
+          
+          <p class="w3-half">
+            <button class="w3-halfw3-button w3-light-grey w3-padding-large" type="submit">
+              <i class="fa fa-plus"></i> Add Skill
+            </button>
+          </p>
+        </div>
+        <div class="w3-col m6 w3-padding-small w3-padding-large skill_list scroller" style="padding-top: 5px;">
+          <div class="w3-card-4 w3-padding-small">
+              <header class="w3-container w3-light-grey">
+                <h3>{language}</h3>
+              </header>
+              
+              <div class="w3-container w3-padding-16">
+                <div class="w3-light-grey">
+                  <div class="w3-container w3-green w3-center" style="width:25%">25%</div>
+                </div>
+              </div>
+              <button class="w3-button w3-block w3-red">+ Remove</button>
+            </div>
+        </div>
+      </div>
+
+      <div tab-content="experience" class="tab-content w3-container">
+        <h2>Add Experience</h2>
+        <div class="w3-col m6 w3-padding-large">
+          <p><input class="w3-input w3-padding-16" type="text" placeholder="Enter job profile" required
+              name="job_profile"></p>
+          <p><input class="w3-input w3-padding-16" type="range" min="40" max="100" step="10" name="level" required></p>
+          
+          <p class="w3-half">
+            <button class="w3-halfw3-button w3-light-grey w3-padding-large" type="submit">
+              <i class="fa fa-plus"></i> Add Experience
+            </button>
+          </p>
+        </div>
+        <div class="w3-col m6 w3-padding-small w3-padding-large experience_list scroller" style="padding-top: 5px;">
+          <div class="w3-card-4 w3-padding-small">
+              <header class="w3-container w3-light-grey">
+                <h3>{language}</h3>
+              </header>
+              
+              <div class="w3-container w3-padding-16">
+                <div class="w3-light-grey">
+                  <div class="w3-container w3-green w3-center" style="width:25%">25%</div>
+                </div>
+              </div>
+              <button class="w3-button w3-block w3-red">+ Remove</button>
+            </div>
+        </div>
+      </div>
+      
+      <div tab-content="settings" class="tab-content w3-container">
+        <div class="w3-col m6 w3-padding-large">
+          <h2>Change Password</h2>
+          <p><input class="w3-input w3-padding-16" type="psasword" placeholder="Enter current password" required
+              name="cur_password"></p>
+          
+          <p><input class="w3-input w3-padding-16" type="psasword" placeholder="Create new password" required
+              name="new_password"></p>
+          
+          <p class="w3-half">
+            <button class="w3-button w3-light-grey w3-padding-large" type="submit">
+              <i class="fa fa-refresh"></i> Change
+            </button>
+          </p>
+        </div>
+        
+        <div class="w3-col m6 w3-padding-small w3-padding-large experience_list scroller" style="padding-top: 5px;">
+          <h2>Deactivate Account</h2>
+          <style>
+            .switch {
+              position: relative;
+              width: 80px;
+              height: 30px;
+              border-radius: 50px;
+              border: solid 1px aqua;
+            }
+            .switch .switch-thumb {
+              position: absolute;
+              left: 4px;
+              top: 0;
+              bottom: 0;
+              background-color: azure;
+              width: 36px;
+              height: 20px;
+              margin: auto;
+              border-radius: 50px;
+              transition: all ease-in-out 0.4s;
+            }
+            .switch input,
+            .deactivate_password_section {
+              display: none;
+            }
+            .deactivate_password_section.active {
+              display: block;
+            }
+            .switch input:checked + .switch-thumb{
+              background-color: aqua;
+              left: 38px;
+            }
+          </style>
+          <div class="w3-padding-small">
+            <div class="switch">
+              <input class="w3-check" id="deactive" type="checkbox" name="deactive">
+              <label class="switch-thumb" for="deactive"></label>
+            </div>
+            <p>notice content</p>
+            <form class="deactivate_password_section" method="POST">
+              <input style="margin-right: 10px" class="w3-half w3-input w3-padding-16" type="psasword" placeholder="Enter current password" required
+              name="deactivate_password">
+            
+              <button class="w3-button w3-light-grey w3-padding-large" type="submit">
+                <i class="fa fa-refresh"></i> Deactivate
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    
+  <!-- End About Section -->
+  </div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script>
+  $(document).ready(function() {
+    var activateTab = (function(target) {
+      $(`[tab-target=${target}], [tab-content=${target}]`).addClass('active').siblings().removeClass('active');
+    });
+
+    $('.open_tab').each(function() {
+      var is_active = $(this).hasClass('active');
+      if (is_active) {
+        target = $(this).attr('tab-target');
+        activateTab(target)
+      }
+    });
+
+    $('.open_tab').click(function() {
+      target = $(this).attr('tab-target');
+      activateTab(target)
+    });
+    
+    $('.switch').click(function() {
+      is_checked = $(this).find('input').prop('checked');
+      if (is_checked) {
+        $(this).find('input').prop('checked', false);
+        $('.deactivate_password_section').removeClass('active');
+      } else {
+        $('.deactivate_password_section').addClass('active');
+        $(this).find('input').prop('checked', true);
+      }
+    });
+    
+    $('#{{user_data.user.Gender}}').prop('checked', true);
+
+    $('input, textarea').each(function() {
+      if ($(this).val() == 'None') {
+        $(this).val('');
+      }
+    });
+
+    $('.lang-level').change(function() {
+      var level = $(this).val();
+      $('.bubble').text(level + '%')
+    });
+    
+  });
+</script>
+<script>
+    /*var ele = document.querySelector(".open_tab");
+    
+    function selectTab(tabName) {
+      var i;
+      var x = document.getElementsByClassName("tab");
+      for (i = 0; i < x.length; i++) {
+        x[i].style.display = "none";
+      }
+      document.getElementById(tabName).style.display = "block";  
+    }
+
+    var tabs_data = document.querySelectorAll('div.tab-content');
+    
+    document.querySelectorAll(".open_tab").forEach(item => {
+      item.addEventListener('click', event => {
+            var target_ele = item.getAttribute('tab-target');
+            tabs_data.forEach(tab => {
+              tab.classList.remove('active');
+              
+              if (target_ele == tab.getAttribute('tab-content')) {
+                tab.classList.add('active');
+              }
+            });
+            //handle click
+        });
+    });*/
+    </script>
+{% endblock %}
